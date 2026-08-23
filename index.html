@@ -1,1 +1,400 @@
 
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI Faceless Reels</title>
+
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: Arial, sans-serif;
+    }
+
+    body {
+      background: #0b1020;
+      color: white;
+      min-height: 100vh;
+    }
+
+    .container {
+      max-width: 1000px;
+      margin: auto;
+      padding: 25px 18px;
+    }
+
+    header {
+      text-align: center;
+      padding: 35px 10px;
+    }
+
+    .logo {
+      font-size: 34px;
+      font-weight: 800;
+      margin-bottom: 10px;
+    }
+
+    .logo span {
+      color: #6c63ff;
+    }
+
+    header p {
+      color: #aeb6cc;
+      font-size: 16px;
+    }
+
+    .card {
+      background: #151c31;
+      border: 1px solid #29324d;
+      border-radius: 18px;
+      padding: 24px;
+      margin-bottom: 20px;
+    }
+
+    .card h2 {
+      margin-bottom: 18px;
+    }
+
+    label {
+      display: block;
+      margin: 15px 0 8px;
+      color: #dce2f2;
+      font-weight: 600;
+    }
+
+    input,
+    select,
+    textarea {
+      width: 100%;
+      padding: 14px;
+      border-radius: 10px;
+      border: 1px solid #34405f;
+      background: #0d1427;
+      color: white;
+      outline: none;
+      font-size: 15px;
+    }
+
+    textarea {
+      min-height: 120px;
+      resize: vertical;
+    }
+
+    input:focus,
+    select:focus,
+    textarea:focus {
+      border-color: #6c63ff;
+    }
+
+    button {
+      border: none;
+      border-radius: 10px;
+      padding: 14px 20px;
+      font-size: 15px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .primary {
+      width: 100%;
+      margin-top: 20px;
+      background: #6c63ff;
+      color: white;
+    }
+
+    .primary:hover {
+      background: #574ee8;
+    }
+
+    .secondary {
+      background: #252e48;
+      color: white;
+      margin-top: 15px;
+    }
+
+    .result {
+      display: none;
+    }
+
+    .scene {
+      background: #0d1427;
+      border: 1px solid #29324d;
+      border-radius: 12px;
+      padding: 18px;
+      margin-top: 15px;
+    }
+
+    .scene h3 {
+      color: #8d87ff;
+      margin-bottom: 10px;
+    }
+
+    .scene p {
+      color: #c7cee0;
+      line-height: 1.6;
+      margin-bottom: 8px;
+    }
+
+    .status {
+      text-align: center;
+      color: #9fa9c2;
+      margin-top: 15px;
+      display: none;
+    }
+
+    .features {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 15px;
+      margin-top: 20px;
+    }
+
+    .feature {
+      background: #151c31;
+      border: 1px solid #29324d;
+      border-radius: 14px;
+      padding: 20px;
+      text-align: center;
+    }
+
+    .feature strong {
+      display: block;
+      margin-bottom: 8px;
+    }
+
+    .feature span {
+      color: #9fa9c2;
+      font-size: 14px;
+    }
+
+    footer {
+      text-align: center;
+      color: #727c95;
+      padding: 30px 0;
+      font-size: 13px;
+    }
+
+    @media (max-width: 700px) {
+      .features {
+        grid-template-columns: 1fr;
+      }
+
+      .logo {
+        font-size: 28px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="container">
+
+    <header>
+      <div class="logo">AI <span>Faceless Reels</span></div>
+      <p>Create short-form faceless video content with AI</p>
+    </header>
+
+    <div class="card">
+
+      <h2>Create a Video Series</h2>
+
+      <label for="topic">What should your videos be about?</label>
+
+      <input
+        id="topic"
+        type="text"
+        placeholder="Example: AI tools that can make money"
+      >
+
+      <label for="platform">Platform</label>
+
+      <select id="platform">
+        <option>TikTok</option>
+        <option>YouTube Shorts</option>
+        <option>Instagram Reels</option>
+        <option>Facebook Reels</option>
+      </select>
+
+      <label for="duration">Video Duration</label>
+
+      <select id="duration">
+        <option value="30">30 seconds</option>
+        <option value="60">60 seconds</option>
+      </select>
+
+      <label for="style">Video Style</label>
+
+      <select id="style">
+        <option>Educational</option>
+        <option>Motivational</option>
+        <option>Storytelling</option>
+        <option>Facts</option>
+        <option>News</option>
+        <option>Entertainment</option>
+      </select>
+
+      <button class="primary" onclick="generateSeries()">
+        Generate Video Series
+      </button>
+
+      <div class="status" id="status">
+        Creating your video plan...
+      </div>
+
+    </div>
+
+    <div class="card result" id="result">
+
+      <h2>Your AI Video Series</h2>
+
+      <div id="scenes"></div>
+
+      <button class="secondary" onclick="downloadPlan()">
+        Download Video Plan
+      </button>
+
+    </div>
+
+    <div class="features">
+
+      <div class="feature">
+        <strong>AI Scripts</strong>
+        <span>Generate short-form video scripts.</span>
+      </div>
+
+      <div class="feature">
+        <strong>Scene Planning</strong>
+        <span>Break videos into connected scenes.</span>
+      </div>
+
+      <div class="feature">
+        <strong>Automation</strong>
+        <span>Automation features can be added later.</span>
+      </div>
+
+    </div>
+
+    <footer>
+      AI Faceless Reels — Free MVP
+    </footer>
+
+  </div>
+
+  <script>
+
+    let currentPlan = "";
+
+    function generateSeries() {
+
+      const topic = document.getElementById("topic").value.trim();
+      const platform = document.getElementById("platform").value;
+      const duration = document.getElementById("duration").value;
+      const style = document.getElementById("style").value;
+
+      if (!topic) {
+        alert("Please enter a topic first.");
+        return;
+      }
+
+      const status = document.getElementById("status");
+      const result = document.getElementById("result");
+      const scenes = document.getElementById("scenes");
+
+      status.style.display = "block";
+      result.style.display = "none";
+
+      setTimeout(() => {
+
+        const sceneCount = duration == 60 ? 10 : 5;
+        let output = "";
+
+        output += `
+          <p style="color:#9fa9c2;margin-bottom:15px;">
+            Topic: <strong style="color:white">${escapeHTML(topic)}</strong><br>
+            Platform: ${platform}<br>
+            Style: ${style}<br>
+            Duration: ${duration} seconds
+          </p>
+        `;
+
+        for (let i = 1; i <= sceneCount; i++) {
+
+          const seconds = duration == 60 ? 6 : 6;
+
+          output += `
+            <div class="scene">
+
+              <h3>Scene ${i} — ${seconds} seconds</h3>
+
+              <p>
+                <strong>Image Prompt:</strong><br>
+                Create a high-quality cinematic visual for scene ${i}
+                about "${escapeHTML(topic)}". Maintain consistent
+                characters, environment, lighting, colors and visual
+                style throughout the entire story.
+              </p>
+
+              <p>
+                <strong>Video Prompt:</strong><br>
+                Animate this image naturally for approximately
+                ${seconds} seconds. Continue the action from the
+                previous scene and end in a position that naturally
+                leads into the next scene.
+              </p>
+
+            </div>
+          `;
+        }
+
+        scenes.innerHTML = output;
+
+        currentPlan = scenes.innerText;
+
+        status.style.display = "none";
+        result.style.display = "block";
+
+        window.scrollTo({
+          top: result.offsetTop,
+          behavior: "smooth"
+        });
+
+      }, 700);
+    }
+
+    function escapeHTML(text) {
+
+      const div = document.createElement("div");
+      div.textContent = text;
+
+      return div.innerHTML;
+    }
+
+    function downloadPlan() {
+
+      if (!currentPlan) return;
+
+      const blob = new Blob(
+        [currentPlan],
+        { type: "text/plain" }
+      );
+
+      const url = URL.createObjectURL(blob);
+
+      const a = document.createElement("a");
+
+      a.href = url;
+      a.download = "ai-faceless-reels-plan.txt";
+
+      a.click();
+
+      URL.revokeObjectURL(url);
+    }
+
+  </script>
+
+</body>
+  </html>
