@@ -1,1 +1,352 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI Faceless Reels</title>
+<style>
+*{box-sizing:border-box}
+body{
+  margin:0;
+  font-family:Arial,sans-serif;
+  background:#080d1c;
+  color:#fff;
+}
+.container{max-width:950px;margin:auto;padding:20px}
+header{text-align:center;padding:30px 10px}
+.logo{font-size:32px;font-weight:800}
+.logo span{color:#6c63ff}
+.subtitle{color:#9da7bf;margin-top:8px}
+.card{
+  background:#121a2d;
+  border:1px solid #293653;
+  border-radius:18px;
+  padding:22px;
+  margin-bottom:20px;
+}
+h2{margin-top:0}
+label{display:block;margin:15px 0 7px;font-weight:bold}
+input,select{
+  width:100%;
+  padding:14px;
+  border-radius:10px;
+  border:1px solid #34405f;
+  background:#0b1224;
+  color:#fff;
+  font-size:15px;
+}
+button{
+  border:0;
+  border-radius:10px;
+  padding:14px 18px;
+  font-weight:bold;
+  cursor:pointer;
+}
+.generate{
+  width:100%;
+  margin-top:20px;
+  background:#6c63ff;
+  color:#fff;
+  font-size:16px;
+}
+.secondary{background:#293653;color:#fff;margin-top:15px}
+.hidden{display:none}
+.loading{text-align:center;padding:20px;color:#aeb8d0}
+.story{
+  background:#0b1224;
+  padding:18px;
+  border-radius:12px;
+  line-height:1.7;
+  color:#d4daea;
+}
+.scene{
+  background:#0b1224;
+  border:1px solid #293653;
+  border-radius:14px;
+  padding:18px;
+  margin-top:15px;
+}
+.scene-title{
+  color:#8d87ff;
+  font-weight:bold;
+  font-size:18px;
+  margin-bottom:12px;
+}
+.scene p{line-height:1.6;color:#cbd2e3}
+.scene strong{color:#fff}
+.notice{color:#8f9ab4;font-size:13px;line-height:1.5;margin-top:15px}
+</style>
+</head>
 
+<body>
+
+<div class="container">
+
+<header>
+  <div class="logo">AI <span>Faceless Reels</span></div>
+  <div class="subtitle">Create connected short-form video plans</div>
+</header>
+
+<div class="card">
+
+<h2>Create a Video Series</h2>
+
+<label>Topic</label>
+<input id="topic" type="text"
+placeholder="Example: 5 AI tools students should know">
+
+<label>Platform</label>
+<select id="platform">
+<option>TikTok</option>
+<option>YouTube Shorts</option>
+<option>Instagram Reels</option>
+<option>Facebook Reels</option>
+</select>
+
+<label>Duration</label>
+<select id="duration">
+<option value="60">60 seconds</option>
+<option value="30">30 seconds</option>
+</select>
+
+<label>Style</label>
+<select id="style">
+<option>Educational</option>
+<option>Motivational</option>
+<option>Storytelling</option>
+<option>Facts</option>
+<option>News</option>
+<option>Entertainment</option>
+</select>
+
+<label>Audience</label>
+<input id="audience" type="text"
+placeholder="Example: Young adults">
+
+<button class="generate" onclick="generateSeries()">
+Generate Video Series
+</button>
+
+<div id="loading" class="loading hidden">
+Creating your production plan...
+</div>
+
+<div class="notice">
+Free MVP mode. No API key is required.
+</div>
+
+</div>
+
+<div id="result" class="card hidden">
+
+<h2>Your Video Production Plan</h2>
+
+<div id="story"></div>
+
+<div id="scenes"></div>
+
+<button class="secondary" onclick="downloadPlan()">
+Download Production Plan
+</button>
+
+</div>
+
+</div>
+
+<script>
+
+let finalPlan="";
+
+function generateSeries(){
+
+const topic=document.getElementById("topic").value.trim();
+
+if(!topic){
+alert("Please enter a topic first.");
+return;
+}
+
+const platform=document.getElementById("platform").value;
+const duration=Number(document.getElementById("duration").value);
+const style=document.getElementById("style").value;
+const audience=document.getElementById("audience").value.trim()||"general audience";
+
+document.getElementById("loading").classList.remove("hidden");
+document.getElementById("result").classList.add("hidden");
+
+setTimeout(function(){
+
+const total=duration===60?10:5;
+const seconds=6;
+
+let title="The Complete Guide to "+topic;
+
+document.getElementById("story").innerHTML=
+'<div class="story">'+
+'<strong>VIDEO TITLE</strong><br>'+
+escapeHTML(title)+
+'<br><br>'+
+'<strong>TOPIC</strong><br>'+
+escapeHTML(topic)+
+'<br><br>'+
+'<strong>STYLE</strong>: '+escapeHTML(style)+
+'<br>'+
+'<strong>PLATFORM</strong>: '+escapeHTML(platform)+
+'<br>'+
+'<strong>AUDIENCE</strong>: '+escapeHTML(audience)+
+'</div>';
+
+let html="";
+
+for(let i=1;i<=total;i++){
+
+let direction=getDirection(i,total,topic);
+
+let imagePrompt=
+"Create a high-quality cinematic image for Scene "+i+
+" of an original "+style.toLowerCase()+
+" short-form video about "+topic+". "+
+direction+
+" Keep the same visual style, environment, lighting, colors, "+
+"characters and objects throughout the entire story. "+
+"Make this look like a frame from one continuous professional video.";
+
+let videoPrompt=
+"Animate the supplied image for exactly about "+seconds+
+" seconds. "+direction+
+" Use natural movement, realistic physics and smooth camera motion. "+
+"Do not change the character identity, clothing, environment or visual style. "+
+"End the movement naturally so it connects directly to the next scene.";
+
+let voice=getVoice(i,total,topic);
+
+html+=
+'<div class="scene">'+
+'<div class="scene-title">SCENE '+i+' — '+seconds+' SECONDS</div>'+
+'<p><strong>SCENE DIRECTION</strong><br>'+
+escapeHTML(direction)+'</p>'+
+'<p><strong>IMAGE PROMPT</strong><br>'+
+escapeHTML(imagePrompt)+'</p>'+
+'<p><strong>IMAGE-TO-VIDEO PROMPT</strong><br>'+
+escapeHTML(videoPrompt)+'</p>'+
+'<p><strong>VOICEOVER</strong><br>'+
+escapeHTML(voice)+'</p>'+
+'</div>';
+
+}
+
+document.getElementById("scenes").innerHTML=html;
+
+finalPlan=
+"AI FACELESS REELS\n\n"+
+"TITLE: "+title+"\n"+
+"TOPIC: "+topic+"\n"+
+"PLATFORM: "+platform+"\n"+
+"DURATION: "+duration+" seconds\n"+
+"STYLE: "+style+"\n\n"+
+document.getElementById("scenes").innerText;
+
+document.getElementById("loading").classList.add("hidden");
+document.getElementById("result").classList.remove("hidden");
+
+window.scrollTo({
+top:document.getElementById("result").offsetTop,
+behavior:"smooth"
+});
+
+},700);
+
+}
+
+function getDirection(scene,total,topic){
+
+if(scene===1){
+
+return "Open with a powerful visual hook introducing "+topic+
+". Create curiosity immediately and make viewers want to continue.";
+
+}
+
+if(scene===total){
+
+return "Continue from Scene "+(scene-1)+
+" and bring the story to a satisfying conclusion about "+topic+
+". End with a memorable final visual.";
+
+}
+
+if(scene===2){
+
+return "Continue directly from Scene 1. Introduce the first important "+
+"idea or event related to "+topic+
+". The characters, objects and environment must remain consistent.";
+
+}
+
+return "Continue directly from Scene "+(scene-1)+
+". Develop the story with the next logical event or information about "+
+topic+
+". The scene must look like a continuation of the previous clip.";
+
+}
+
+function getVoice(scene,total,topic){
+
+if(scene===1){
+
+return "What if there was more to "+topic+
+" than most people realize? Stay with me.";
+
+}
+
+if(scene===total){
+
+return "And that is the key lesson about "+topic+
+". Now you know what to look for.";
+
+}
+
+return "Here is the next important part. As the story continues, "+
+"you will discover why "+topic+" matters.";
+
+}
+
+function escapeHTML(text){
+
+const div=document.createElement("div");
+div.textContent=text;
+return div.innerHTML;
+
+}
+
+function downloadPlan(){
+
+if(!finalPlan){
+alert("Generate a series first.");
+return;
+}
+
+const blob=new Blob(
+[finalPlan],
+{type:"text/plain"}
+);
+
+const url=URL.createObjectURL(blob);
+
+const link=document.createElement("a");
+
+link.href=url;
+link.download="ai-faceless-reels-production-plan.txt";
+
+document.body.appendChild(link);
+link.click();
+document.body.removeChild(link);
+
+URL.revokeObjectURL(url);
+
+}
+
+</script>
+
+</body>
+  </html>
