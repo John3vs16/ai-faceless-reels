@@ -1,64 +1,170 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
 <title>AI Faceless Reels</title>
 <style>
-*{box-sizing:border-box}body{margin:0;font-family:Arial,sans-serif;background:#f4f7fb;color:#172033}
-.container{max-width:760px;margin:auto;padding:24px 16px 50px}.hero{background:linear-gradient(135deg,#111f4d,#2859d6);color:#fff;border-radius:22px;padding:28px 22px;margin-bottom:18px}
-h1{margin:0 0 8px;font-size:30px}.subtitle{margin:0;opacity:.9;line-height:1.5}.card{background:#fff;border-radius:18px;padding:20px;margin-bottom:16px;box-shadow:0 6px 22px rgba(20,35,70,.08)}
-label{display:block;font-weight:700;margin:14px 0 7px}input,select{width:100%;padding:13px 14px;border:1px solid #d6dce8;border-radius:11px;font-size:16px;background:#fff}
-button{width:100%;border:0;border-radius:12px;padding:15px;margin-top:18px;background:#2458d7;color:#fff;font-size:17px;font-weight:700}button:disabled{opacity:.6}
-.status{margin-top:14px;padding:12px;border-radius:10px;background:#eef3ff;display:none;line-height:1.45}.error{background:#fff0f0;color:#9b1c1c}
-.result{display:none}.hook{font-size:20px;font-weight:700;line-height:1.4}.scene{border:1px solid #e1e6ef;border-radius:14px;padding:15px;margin-top:12px}
-.scene h3{margin:0 0 8px}.scene p{margin:7px 0;line-height:1.5}.muted{color:#667085;font-size:14px}
+body{font-family:Arial;margin:0;background:#f4f7fb;color:#172033}
+main{max-width:700px;margin:auto;padding:20px}
+.card{background:white;padding:20px;border-radius:16px;margin-bottom:15px}
+input,select,button{width:100%;padding:13px;margin:8px 0;border-radius:9px;font-size:16px}
+input,select{border:1px solid #ccc}
+button{background:#2458d7;color:white;border:0;font-weight:bold}
+#status{margin-top:12px;padding:10px}
+#result{display:none}
+.scene{border:1px solid #ddd;padding:12px;margin:10px 0;border-radius:10px}
 </style>
 </head>
+
 <body>
-<main class="container">
-<section class="hero"><h1>AI Faceless Reels</h1><p class="subtitle">Create a structured short-form video plan with AI.</p></section>
-<section class="card">
-<label for="topic">Video topic</label>
-<input id="topic" placeholder="e.g. 5 ways to make money with AI">
-<label for="platform">Platform</label>
-<select id="platform"><option>TikTok</option><option>Instagram Reels</option><option>YouTube Shorts</option><option>Facebook Reels</option></select>
-<label for="duration">Duration</label>
-<select id="duration"><option value="60">60 seconds</option><option value="30">30 seconds</option><option value="90">90 seconds</option></select>
-<label for="style">Style</label>
-<select id="style"><option>Educational</option><option>Storytelling</option><option>Motivational</option><option>News</option><option>Listicle</option></select>
-<label for="audience">Audience</label>
-<input id="audience" placeholder="e.g. beginners interested in AI">
-<label for="apiUrl">Worker API URL</label>
-<input id="apiUrl" type="url" placeholder="https://your-worker.workers.dev">
-<div class="muted">Enter your Cloudflare Worker URL once. It is saved on this device.</div>
-<button id="generateButton">Generate Video Plan</button><div id="status" class="status"></div>
-</section>
-<section id="result" class="card result">
-<h2 id="title"></h2><p><strong>Hook</strong></p><p id="hook" class="hook"></p>
-<p><strong>Narration</strong></p><p id="narration"></p><div id="scenes"></div>
-<p><strong>CTA</strong></p><p id="cta"></p>
-</section>
+<main>
+
+<div class="card">
+<h1>AI Faceless Reels</h1>
+<p>Create a short-form video plan with AI.</p>
+
+<input id="topic" placeholder="Enter your video topic">
+
+<select id="platform">
+<option>TikTok</option>
+<option>Instagram Reels</option>
+<option>YouTube Shorts</option>
+</select>
+
+<select id="duration">
+<option value="60">60 seconds</option>
+<option value="30">30 seconds</option>
+<option value="90">90 seconds</option>
+</select>
+
+<select id="style">
+<option>Educational</option>
+<option>Storytelling</option>
+<option>Motivational</option>
+<option>News</option>
+</select>
+
+<input id="audience" placeholder="Audience, e.g. beginners">
+
+<button onclick="generate()">Generate Video Plan</button>
+
+<div id="status"></div>
+</div>
+
+<div id="result" class="card">
+<h2 id="title"></h2>
+<h3>Hook</h3>
+<p id="hook"></p>
+<h3>Narration</h3>
+<p id="narration"></p>
+<h3>Scenes</h3>
+<div id="scenes"></div>
+<h3>Call to Action</h3>
+<p id="cta"></p>
+</div>
+
 </main>
+
 <script>
-const apiInput=document.getElementById("apiUrl");
-const saved=localStorage.getItem("facelessReelsApiUrl");if(saved)apiInput.value=saved;
-function showStatus(message,error=false){const s=document.getElementById("status");s.textContent=message;s.className="status"+(error?" error":"");s.style.display="block";}
-function esc(v){return String(v??"").replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll('"',"&quot;").replaceAll("'","&#039;")}
-function renderResult(data){
-const v=data.video||{};document.getElementById("title").textContent=v.title||"Generated Video Plan";
-document.getElementById("hook").textContent=v.hook||"";document.getElementById("narration").textContent=v.narration||"";document.getElementById("cta").textContent=v.cta||"";
-const box=document.getElementById("scenes");box.innerHTML="<h3>Scenes</h3>";
-(v.scenes||[]).forEach((x,i)=>{const d=document.createElement("div");d.className="scene";d.innerHTML="<h3>Scene "+(x.scene||i+1)+" — "+esc(x.duration)+"</h3><p><strong>Visual:</strong> "+esc(x.visual)+"</p><p><strong>Voiceover:</strong> "+esc(x.voiceover)+"</p><p><strong>Caption:</strong> "+esc(x.caption)+"</p>";box.appendChild(d)});
+const WORKER =
+"https://faceless-reels-api.chimeradragonfly.workers.dev";
+
+async function generate(){
+
+const topic=document.getElementById("topic").value.trim();
+
+if(!topic){
+document.getElementById("status").textContent=
+"Please enter a topic first.";
+return;
+}
+
+document.getElementById("status").textContent=
+"Generating...";
+
+try{
+
+const response=await fetch(WORKER,{
+method:"POST",
+headers:{
+"Content-Type":"application/json"
+},
+body:JSON.stringify({
+topic:topic,
+platform:document.getElementById("platform").value,
+duration:Number(document.getElementById("duration").value),
+style:document.getElementById("style").value,
+audience:document.getElementById("audience").value
+})
+});
+
+const data=await response.json();
+
+if(!data.success){
+throw new Error(data.error||"AI Worker error");
+}
+
+let video=data.video;
+
+if(typeof video==="string"){
+try{
+video=JSON.parse(video);
+}catch{
+video={
+title:"Generated Video",
+hook:"",
+narration:video,
+scenes:[],
+cta:""
+};
+}
+}
+
+document.getElementById("title").textContent=
+video.title||"Generated Video";
+
+document.getElementById("hook").textContent=
+video.hook||"";
+
+document.getElementById("narration").textContent=
+video.narration||"";
+
+document.getElementById("cta").textContent=
+video.cta||"";
+
+const scenes=document.getElementById("scenes");
+scenes.innerHTML="";
+
+(video.scenes||[]).forEach((s,i)=>{
+
+const div=document.createElement("div");
+div.className="scene";
+
+div.innerHTML=
+"<b>Scene "+(s.scene||i+1)+"</b>"+
+"<p><b>Time:</b> "+(s.duration||"")+"</p>"+
+"<p><b>Visual:</b> "+(s.visual||"")+"</p>"+
+"<p><b>Voiceover:</b> "+(s.voiceover||"")+"</p>"+
+"<p><b>Caption:</b> "+(s.caption||"")+"</p>";
+
+scenes.appendChild(div);
+
+});
+
 document.getElementById("result").style.display="block";
+document.getElementById("status").textContent=
+"Video plan generated successfully.";
+
+}catch(error){
+
+document.getElementById("status").textContent=
+"Error: "+error.message;
+
 }
-async function generateSeries(){
-const topic=document.getElementById("topic").value.trim(),platform=document.getElementById("platform").value,duration=Number(document.getElementById("duration").value),style=document.getElementById("style").value,audience=document.getElementById("audience").value.trim(),apiUrl=apiInput.value.trim().replace(/\/+$/,""),button=document.getElementById("generateButton");
-if(!topic){showStatus("Please enter a topic first.",true);return}if(!apiUrl){showStatus("Please enter your Cloudflare Worker URL.",true);return}
-localStorage.setItem("facelessReelsApiUrl",apiUrl);button.disabled=true;showStatus("Generating your video plan...");
-try{const r=await fetch(apiUrl,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({topic,platform,duration,style,audience})});const data=await r.json();if(!r.ok||data.success===false)throw new Error(data.error||"The AI Worker returned an error.");renderResult(data);showStatus("Video plan generated successfully.")}catch(e){showStatus("Could not connect to the AI Worker. Check the Worker URL and try again. "+e.message,true)}finally{button.disabled=false}
+
 }
-document.getElementById("generateButton").addEventListener("click",generateSeries);
 </script>
+
 </body>
-                                                                                                    </html>
+  </html>
