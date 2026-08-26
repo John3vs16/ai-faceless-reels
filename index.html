@@ -1,170 +1,303 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>AI Faceless Reels</title>
-<style>
-body{font-family:Arial;margin:0;background:#f4f7fb;color:#172033}
-main{max-width:700px;margin:auto;padding:20px}
-.card{background:white;padding:20px;border-radius:16px;margin-bottom:15px}
-input,select,button{width:100%;padding:13px;margin:8px 0;border-radius:9px;font-size:16px}
-input,select{border:1px solid #ccc}
-button{background:#2458d7;color:white;border:0;font-weight:bold}
-#status{margin-top:12px;padding:10px}
-#result{display:none}
-.scene{border:1px solid #ddd;padding:12px;margin:10px 0;border-radius:10px}
-</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Faceless Reels Generator</title>
+  <style>
+    :root {
+      --bg: #0f0f1a;
+      --card: #1a1a2e;
+      --accent: #7c3aed;
+      --accent-hover: #6d28d9;
+      --text: #e2e8f0;
+      --muted: #94a3b8;
+      --border: #2d2d44;
+      --success: #22c55e;
+      --error: #ef4444;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      min-height: 100vh;
+      padding: 2rem 1rem;
+    }
+    .container {
+      max-width: 720px;
+      margin: 0 auto;
+    }
+    h1 {
+      font-size: 1.75rem;
+      margin-bottom: 0.5rem;
+      text-align: center;
+    }
+    .subtitle {
+      color: var(--muted);
+      text-align: center;
+      margin-bottom: 2rem;
+      font-size: 0.95rem;
+    }
+    .input-group {
+      display: flex;
+      gap: 0.75rem;
+      margin-bottom: 2rem;
+    }
+    input[type="text"] {
+      flex: 1;
+      padding: 0.85rem 1rem;
+      border-radius: 0.75rem;
+      border: 1px solid var(--border);
+      background: var(--card);
+      color: var(--text);
+      font-size: 1rem;
+      outline: none;
+    }
+    input[type="text"]:focus {
+      border-color: var(--accent);
+    }
+    button {
+      padding: 0.85rem 1.5rem;
+      border-radius: 0.75rem;
+      border: none;
+      background: var(--accent);
+      color: white;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s;
+      white-space: nowrap;
+    }
+    button:hover:not(:disabled) {
+      background: var(--accent-hover);
+    }
+    button:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+    .loading {
+      text-align: center;
+      color: var(--muted);
+      padding: 2rem;
+      display: none;
+    }
+    .loading.active { display: block; }
+    .spinner {
+      width: 40px;
+      height: 40px;
+      border: 3px solid var(--border);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      margin: 0 auto 1rem;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .error {
+      background: rgba(239, 68, 68, 0.1);
+      border: 1px solid var(--error);
+      color: #fca5a5;
+      padding: 1rem;
+      border-radius: 0.75rem;
+      margin-bottom: 1.5rem;
+      display: none;
+    }
+    .error.active { display: block; }
+    .result {
+      display: none;
+    }
+    .result.active { display: block; }
+    .result-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 1rem;
+      padding: 1.5rem;
+      margin-bottom: 1rem;
+    }
+    .result-card h2 {
+      font-size: 1.1rem;
+      margin-bottom: 0.75rem;
+      color: var(--accent);
+    }
+    .result-card p, .result-card li {
+      line-height: 1.6;
+      color: var(--text);
+    }
+    .scene {
+      background: rgba(124, 58, 237, 0.08);
+      border-left: 3px solid var(--accent);
+      padding: 1rem;
+      border-radius: 0 0.5rem 0.5rem 0;
+      margin-bottom: 1rem;
+    }
+    .scene-header {
+      font-weight: 600;
+      color: var(--accent);
+      margin-bottom: 0.5rem;
+      font-size: 0.9rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    .hashtags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+    .hashtag {
+      background: rgba(124, 58, 237, 0.15);
+      color: #c4b5fd;
+      padding: 0.35rem 0.75rem;
+      border-radius: 2rem;
+      font-size: 0.85rem;
+    }
+    .hook {
+      font-size: 1.15rem;
+      font-weight: 600;
+      color: #fbbf24;
+    }
+  </style>
 </head>
-
 <body>
-<main>
+  <div class="container">
+    <h1>Faceless Reels Generator</h1>
+    <p class="subtitle">Enter a topic and get a complete video plan with scenes, voiceover, captions & hashtags.</p>
 
-<div class="card">
-<h1>AI Faceless Reels</h1>
-<p>Create a short-form video plan with AI.</p>
+    <div class="input-group">
+      <input type="text" id="topicInput" placeholder="e.g. How AI is changing education" autocomplete="off">
+      <button id="generateBtn" onclick="generate()">Generate</button>
+    </div>
 
-<input id="topic" placeholder="Enter your video topic">
+    <div id="loading" class="loading">
+      <div class="spinner"></div>
+      <p>Crafting your video plan with AI…</p>
+    </div>
 
-<select id="platform">
-<option>TikTok</option>
-<option>Instagram Reels</option>
-<option>YouTube Shorts</option>
-</select>
+    <div id="error" class="error"></div>
 
-<select id="duration">
-<option value="60">60 seconds</option>
-<option value="30">30 seconds</option>
-<option value="90">90 seconds</option>
-</select>
+    <div id="result" class="result">
+      <div class="result-card">
+        <h2>Title</h2>
+        <p id="title"></p>
+      </div>
 
-<select id="style">
-<option>Educational</option>
-<option>Storytelling</option>
-<option>Motivational</option>
-<option>News</option>
-</select>
+      <div class="result-card">
+        <h2>Hook</h2>
+        <p id="hook" class="hook"></p>
+      </div>
 
-<input id="audience" placeholder="Audience, e.g. beginners">
+      <div class="result-card">
+        <h2>Scenes</h2>
+        <div id="scenes"></div>
+      </div>
 
-<button onclick="generate()">Generate Video Plan</button>
+      <div class="result-card">
+        <h2>Caption</h2>
+        <p id="caption"></p>
+      </div>
 
-<div id="status"></div>
-</div>
+      <div class="result-card">
+        <h2>Hashtags</h2>
+        <div id="hashtags" class="hashtags"></div>
+      </div>
+    </div>
+  </div>
 
-<div id="result" class="card">
-<h2 id="title"></h2>
-<h3>Hook</h3>
-<p id="hook"></p>
-<h3>Narration</h3>
-<p id="narration"></p>
-<h3>Scenes</h3>
-<div id="scenes"></div>
-<h3>Call to Action</h3>
-<p id="cta"></p>
-</div>
+  <script>
+    const topicInput = document.getElementById('topicInput');
+    const generateBtn = document.getElementById('generateBtn');
+    const loading = document.getElementById('loading');
+    const errorDiv = document.getElementById('error');
+    const result = document.getElementById('result');
 
-</main>
+    topicInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') generate();
+    });
 
-<script>
-const WORKER =
-"https://faceless-reels-api.chimeradragonfly.workers.dev";
+    async function generate() {
+      const topic = topicInput.value.trim();
+      if (!topic) {
+        showError('Please enter a topic.');
+        return;
+      }
 
-async function generate(){
+      // Reset UI
+      errorDiv.classList.remove('active');
+      errorDiv.textContent = '';
+      result.classList.remove('active');
+      loading.classList.add('active');
+      generateBtn.disabled = true;
 
-const topic=document.getElementById("topic").value.trim();
+      try {
+        const response = await fetch('/api/generate', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ topic })
+        });
 
-if(!topic){
-document.getElementById("status").textContent=
-"Please enter a topic first.";
-return;
-}
+        let data;
+        const contentType = response.headers.get('content-type') || '';
 
-document.getElementById("status").textContent=
-"Generating...";
+        if (contentType.includes('application/json')) {
+          data = await response.json();
+        } else {
+          const text = await response.text();
+          throw new Error(`Server returned non-JSON (${response.status}): ${text.slice(0, 200)}`);
+        }
 
-try{
+        if (!response.ok) {
+          throw new Error(data.error || data.message || `Request failed with status ${response.status}`);
+        }
 
-const response=await fetch(WORKER,{
-method:"POST",
-headers:{
-"Content-Type":"application/json"
-},
-body:JSON.stringify({
-topic:topic,
-platform:document.getElementById("platform").value,
-duration:Number(document.getElementById("duration").value),
-style:document.getElementById("style").value,
-audience:document.getElementById("audience").value
-})
-});
+        if (data.error) {
+          throw new Error(data.error);
+        }
 
-const data=await response.json();
+        render(data);
+      } catch (err) {
+        showError(err.message || 'Something went wrong. Please try again.');
+      } finally {
+        loading.classList.remove('active');
+        generateBtn.disabled = false;
+      }
+    }
 
-if(!data.success){
-throw new Error(data.error||"AI Worker error");
-}
+    function showError(msg) {
+      errorDiv.textContent = msg;
+      errorDiv.classList.add('active');
+    }
 
-let video=data.video;
+    function render(data) {
+      document.getElementById('title').textContent = data.title || 'Untitled';
+      document.getElementById('hook').textContent = data.hook || '';
+      document.getElementById('caption').textContent = data.caption || '';
 
-if(typeof video==="string"){
-try{
-video=JSON.parse(video);
-}catch{
-video={
-title:"Generated Video",
-hook:"",
-narration:video,
-scenes:[],
-cta:""
-};
-}
-}
+      const scenesContainer = document.getElementById('scenes');
+      scenesContainer.innerHTML = '';
 
-document.getElementById("title").textContent=
-video.title||"Generated Video";
+      const scenes = Array.isArray(data.scenes) ? data.scenes : [];
+      scenes.forEach((scene, i) => {
+        const div = document.createElement('div');
+        div.className = 'scene';
+        div.innerHTML = `
+          <div class="scene-header">Scene ${i + 1} — ${scene.time || '0-10s'}</div>
+          <p><strong>Visual:</strong> ${scene.visual || ''}</p>
+          <p><strong>Voiceover:</strong> ${scene.voiceover || ''}</p>
+        `;
+        scenesContainer.appendChild(div);
+      });
 
-document.getElementById("hook").textContent=
-video.hook||"";
+      const hashtagsContainer = document.getElementById('hashtags');
+      hashtagsContainer.innerHTML = '';
+      const tags = Array.isArray(data.hashtags) ? data.hashtags : [];
+      tags.forEach(tag => {
+        const span = document.createElement('span');
+        span.className = 'hashtag';
+        span.textContent = tag.startsWith('#') ? tag : '#' + tag;
+        hashtagsContainer.appendChild(span);
+      });
 
-document.getElementById("narration").textContent=
-video.narration||"";
-
-document.getElementById("cta").textContent=
-video.cta||"";
-
-const scenes=document.getElementById("scenes");
-scenes.innerHTML="";
-
-(video.scenes||[]).forEach((s,i)=>{
-
-const div=document.createElement("div");
-div.className="scene";
-
-div.innerHTML=
-"<b>Scene "+(s.scene||i+1)+"</b>"+
-"<p><b>Time:</b> "+(s.duration||"")+"</p>"+
-"<p><b>Visual:</b> "+(s.visual||"")+"</p>"+
-"<p><b>Voiceover:</b> "+(s.voiceover||"")+"</p>"+
-"<p><b>Caption:</b> "+(s.caption||"")+"</p>";
-
-scenes.appendChild(div);
-
-});
-
-document.getElementById("result").style.display="block";
-document.getElementById("status").textContent=
-"Video plan generated successfully.";
-
-}catch(error){
-
-document.getElementById("status").textContent=
-"Error: "+error.message;
-
-}
-
-}
-</script>
-
+      result.classList.add('active');
+    }
+  </script>
 </body>
-  </html>
+</html>
